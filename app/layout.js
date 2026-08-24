@@ -1,8 +1,8 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Personal Expense Tracker",
-  description: "Track and categorize your personal expenses",
+  title: "What The Internet Knows About You",
+  description: "A small privacy-awareness demo showing what websites can see about you.",
 };
 
 export default function RootLayout({ children }) {

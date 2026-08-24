@@ -5,26 +5,33 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const [data, setData] = useState(null);
   const [status, setStatus] = useState("loading"); // loading | done | error
+  const [browserInfo, setBrowserInfo] = useState({
+    browser: "",
+    language: "",
+    screen: "",
+    platform: "",
+  });
 
   useEffect(() => {
+    setBrowserInfo({
+      browser: navigator.userAgent,
+      language: navigator.language,
+      screen: `${window.screen.width} x ${window.screen.height}`,
+      platform: navigator.platform,
+    });
+
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
       .then((result) => {
+        if (result.error) {
+          setStatus("error");
+          return;
+        }
         setData(result);
         setStatus("done");
       })
       .catch(() => setStatus("error"));
   }, []);
-
-  const browserInfo = {
-    browser: typeof navigator !== "undefined" ? navigator.userAgent : "",
-    language: typeof navigator !== "undefined" ? navigator.language : "",
-    screen:
-      typeof window !== "undefined"
-        ? `${window.screen.width} x ${window.screen.height}`
-        : "",
-    platform: typeof navigator !== "undefined" ? navigator.platform : "",
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-6">
