@@ -34,15 +34,22 @@ whoami-next/
 │   ├── globals.css
 │   ├── layout.js
 │   └── page.js
+├── components/
+│   └── PrivacyDashboard.js
 ├── public/
 ├── .gitignore
+├── AGENTS.md
+├── CLAUDE.md
 ├── eslint.config.mjs
 ├── jsconfig.json
 ├── next.config.mjs
 ├── package.json
 ├── postcss.config.mjs
+├── package-lock.json
 └── README.md
 ```
+
+The `app/` directory contains the route and shared layout. The interactive dashboard lives in `components/`, while `public/` holds static assets and project configuration remains at the root.
 
 ## Running the Project
 
