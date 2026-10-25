@@ -15,6 +15,7 @@ The project is intentionally simple: it demonstrates how much information is ava
 - ISP and network metadata display
 - Browser language and platform detection
 - Screen size reporting
+- Optional, permission-based precise location with reported accuracy
 - Minimal, privacy-focused UI
 - No persistent database or user account system
 
@@ -66,7 +67,9 @@ http://localhost:3000
 ## Notes
 
 - This app uses a public API (`ipapi.co`) to retrieve location and network information.
-- The data is displayed only in the browser and is not stored by this project.
+- IP-based location is approximate. Precise location is requested only after you select the location button and grant browser permission.
+- Precise coordinates are displayed in the page, are not sent to the IP lookup service, and are not stored by this project.
+- Precise location requires a secure context (HTTPS or localhost); reported accuracy depends on the device and environment.
 - Internet access is required for the IP lookup to work.
 
 ## Purpose
