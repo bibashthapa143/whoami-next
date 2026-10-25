@@ -5,21 +5,19 @@ import { useState, useEffect } from "react";
 export default function Home() {
   const [data, setData] = useState(null);
   const [status, setStatus] = useState("loading"); // loading | done | error
-  const [browserInfo, setBrowserInfo] = useState({
-    browser: "",
-    language: "",
-    screen: "",
-    platform: "",
-  });
+
+  
+  const [browserInfo] = useState(() =>
+    typeof navigator === "undefined"
+      ? { language: "", screen: "", platform: "" }
+      : {
+          language: navigator.language,
+          screen: `${window.screen.width} x ${window.screen.height}`,
+          platform: navigator.platform,
+        },
+  );
 
   useEffect(() => {
-    setBrowserInfo({
-      browser: navigator.userAgent,
-      language: navigator.language,
-      screen: `${window.screen.width} x ${window.screen.height}`,
-      platform: navigator.platform,
-    });
-
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
       .then((result) => {
@@ -54,7 +52,7 @@ export default function Home() {
 
         {status === "error" && (
           <p className="text-red-400 text-sm">
-            Couldn't fetch this — check your connection.
+            Couldn&apos;t fetch this — check your connection.
           </p>
         )}
 
