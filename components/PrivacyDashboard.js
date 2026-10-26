@@ -14,14 +14,32 @@ export default function PrivacyDashboard() {
     screen: "",
     platform: "",
     userAgent: "",
+    timezone: "",
+    utcOffset: "",
+    deviceMemory: "",
+    hardwareConcurrency: "",
+    connectionType: "",
+    webglInfo: "",
   });
 
   useEffect(() => {
+    const connection = navigator.connection;
+
     setBrowserInfo({
       language: navigator.language,
       screen: `${window.screen.width} x ${window.screen.height}`,
-      platform: navigator.platform,
+      platform: navigator.userAgentData?.platform || navigator.platform,
       userAgent: navigator.userAgent,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      utcOffset: formatUtcOffset(new Date().getTimezoneOffset()),
+      deviceMemory: navigator.deviceMemory ? `about ${navigator.deviceMemory} GB` : "",
+      hardwareConcurrency: navigator.hardwareConcurrency
+        ? `${navigator.hardwareConcurrency} logical cores`
+        : "",
+      connectionType: connection
+        ? [connection.effectiveType, connection.type].filter(Boolean).join(" / ")
+        : "",
+      webglInfo: getWebGlInfo(),
     });
 
     fetch("https://ipapi.co/json/")
@@ -90,6 +108,12 @@ export default function PrivacyDashboard() {
     browserInfo.language,
     browserInfo.screen,
     browserInfo.userAgent,
+    browserInfo.timezone,
+    browserInfo.utcOffset,
+    browserInfo.deviceMemory,
+    browserInfo.hardwareConcurrency,
+    browserInfo.connectionType,
+    browserInfo.webglInfo,
   ].filter(Boolean).length;
   const signalCount = networkSignalCount + browserSignalCount;
 
@@ -118,12 +142,16 @@ export default function PrivacyDashboard() {
               </p>
               <div className="mt-2 flex items-end gap-3">
                 <span className="text-3xl font-bold text-white">
-                  {status === "done" && data ? signalCount : "--"}
+                  {data || browserSignalCount > 0 ? signalCount : "--"}
                 </span>
-                <span className="pb-1 text-sm font-medium text-amber-300">/ 10</span>
+                <span className="pb-1 text-sm font-medium text-amber-300">/ 16</span>
               </div>
               <p className="mt-2 text-xs text-amber-100">
-                {status === "done" && data ? "Observed during this visit" : "Waiting for data"}
+                {data
+                  ? "Observed during this visit"
+                  : browserSignalCount > 0
+                    ? "Browser details available"
+                    : "Waiting for data"}
               </p>
             </div>
           </header>
@@ -192,36 +220,52 @@ export default function PrivacyDashboard() {
             )}
           </section>
 
-          {status === "done" && data && (
+          {(data || browserSignalCount > 0) && (
             <div className="space-y-6">
-              <section className="grid gap-4 sm:grid-cols-3">
-                <MetricCard label="Network signals" value={`${networkSignalCount} / 6`} detail="returned by IP lookup" />
-                <MetricCard label="IP location" value={data.city ? "Approximate" : "Unavailable"} detail="not GPS location" />
-                <MetricCard label="Browser signals" value={`${browserSignalCount} / 4`} detail="read by this page" />
+              <section className={`grid gap-4 ${data ? "sm:grid-cols-3" : "sm:grid-cols-1"}`}>
+                {data && (
+                  <>
+                    <MetricCard label="Network signals" value={`${networkSignalCount} / 6`} detail="returned by IP lookup" />
+                    <MetricCard label="IP location" value={data.city ? "Approximate" : "Unavailable"} detail="not GPS location" />
+                  </>
+                )}
+                <MetricCard label="Browser signals" value={`${browserSignalCount} / 10`} detail="read locally by this page" />
               </section>
 
-              <section className="grid gap-6 lg:grid-cols-2">
-                <InfoPanel
-                  title="Network"
-                  accent="indigo"
-                  rows={[
-                    { label: "IP Address", value: data.ip },
-                    { label: "City", value: data.city },
-                    { label: "Region", value: data.region },
-                    { label: "Country", value: data.country_name },
-                    { label: "ISP", value: data.org },
-                    { label: "Timezone", value: data.timezone },
-                  ]}
-                />
+              <section className={`grid gap-6 ${data ? "lg:grid-cols-2" : ""}`}>
+                {data && (
+                  <InfoPanel
+                    title="Network"
+                    accent="indigo"
+                    rows={[
+                      { label: "IP Address", value: data.ip },
+                      { label: "City", value: data.city },
+                      { label: "Region", value: data.region },
+                      { label: "Country", value: data.country_name },
+                      { label: "ISP", value: data.org },
+                      { label: "Timezone", value: data.timezone },
+                    ]}
+                  />
+                )}
 
                 <InfoPanel
                   title="Your device"
                   accent="cyan"
                   rows={[
-                    { label: "Platform", value: browserInfo.platform },
+                    { label: "OS / platform", value: browserInfo.platform || "Not exposed by this browser" },
                     { label: "Language", value: browserInfo.language },
                     { label: "Screen size", value: browserInfo.screen },
-                    { label: "User agent", value: browserInfo.userAgent },
+                    { label: "Time zone", value: browserInfo.timezone },
+                    { label: "UTC offset", value: browserInfo.utcOffset },
+                    { label: "Device memory", value: browserInfo.deviceMemory || "Not exposed by this browser" },
+                    { label: "CPU threads", value: browserInfo.hardwareConcurrency || "Not exposed by this browser" },
+                    { label: "Connection type", value: browserInfo.connectionType || "Not exposed by this browser" },
+                    { label: "User agent", value: browserInfo.userAgent, multiline: true },
+                    {
+                      label: "WebGL vendor / renderer / version",
+                      value: browserInfo.webglInfo || "Unavailable or restricted by browser",
+                      multiline: true,
+                    },
                   ]}
                 />
               </section>
@@ -231,7 +275,10 @@ export default function PrivacyDashboard() {
                   Why this matters
                 </p>
                 <p className="text-sm leading-6 text-slate-300">
-                  This is a small privacy-awareness demo — it uses your public IP and browser data, the same kind of metadata nearly every website collects automatically. It&apos;s useful for awareness, not for storing or selling personal information.
+                  This is a small privacy-awareness demo showing what a page can learn from your public IP and browser APIs. Browser settings affect which details are available; this project does not store or sell them.
+                </p>
+                <p className="mt-3 text-sm leading-6 text-slate-400">
+                  Browser details, including WebGL information, are read in your browser and are not sent to the IP lookup service. Some browsers hide or limit these values. The signal count is a count of available fields, not a privacy or risk score.
                 </p>
               </div>
             </div>
@@ -274,20 +321,52 @@ function InfoPanel({ title, rows, accent }) {
       </div>
       <div className="space-y-3">
         {rows.map((row) => (
-          <Row key={row.label} label={row.label} value={row.value} />
+          <Row key={row.label} label={row.label} value={row.value} multiline={row.multiline} />
         ))}
       </div>
     </div>
   );
 }
 
-function Row({ label, value }) {
+function Row({ label, value, multiline }) {
   return (
     <div className="flex items-center justify-between gap-4 border-b border-slate-800 pb-2.5 last:border-b-0 last:pb-0">
       <span className="text-sm text-slate-400">{label}</span>
-      <span className="max-w-[220px] truncate text-right text-sm font-medium text-slate-100">
+      <span
+        className={`${multiline ? "max-w-[65%] break-all" : "max-w-[220px] truncate"} text-right text-sm font-medium text-slate-100`}
+      >
         {value || "—"}
       </span>
     </div>
   );
+}
+
+function formatUtcOffset(offsetMinutes) {
+  const offset = -offsetMinutes;
+  const sign = offset >= 0 ? "+" : "-";
+  const hours = Math.floor(Math.abs(offset) / 60)
+    .toString()
+    .padStart(2, "0");
+  const minutes = (Math.abs(offset) % 60).toString().padStart(2, "0");
+
+  return `UTC${sign}${hours}:${minutes}`;
+}
+
+function getWebGlInfo() {
+  const canvas = document.createElement("canvas");
+  const gl = canvas.getContext("webgl");
+
+  if (!gl) {
+    return "";
+  }
+
+  const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
+  const vendor = gl.getParameter(debugInfo ? debugInfo.UNMASKED_VENDOR_WEBGL : gl.VENDOR);
+  const renderer = gl.getParameter(debugInfo ? debugInfo.UNMASKED_RENDERER_WEBGL : gl.RENDERER);
+  const version = gl.getParameter(gl.VERSION);
+  const info = [vendor, renderer, version].filter(Boolean).join(" / ");
+
+  gl.getExtension("WEBGL_lose_context")?.loseContext();
+
+  return info;
 }
