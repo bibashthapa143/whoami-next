@@ -13,7 +13,6 @@ The project is intentionally simple: it demonstrates how much information is ava
 - Public IP address lookup
 - City, region, country, and timezone detection
 - ISP and network metadata display
-- Browser language and platform detection
 - A separate device fingerprint section showing OS/platform, time zone, UTC offset, approximate device memory, CPU thread count, connection type, and WebGL details when exposed
 - Browser language, screen size, and user agent
 - Optional, permission-based precise location with reported accuracy
