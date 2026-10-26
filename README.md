@@ -14,7 +14,8 @@ The project is intentionally simple: it demonstrates how much information is ava
 - City, region, country, and timezone detection
 - ISP and network metadata display
 - Browser language and platform detection
-- Screen size reporting
+- A separate device fingerprint section showing OS/platform, time zone, UTC offset, approximate device memory, CPU thread count, connection type, and WebGL details when exposed
+- Browser language, screen size, and user agent
 - Optional, permission-based precise location with reported accuracy
 - Minimal, privacy-focused UI
 - No persistent database or user account system
@@ -76,6 +77,7 @@ http://localhost:3000
 - This app uses a public API (`ipapi.co`) to retrieve location and network information.
 - IP-based location is approximate. Precise location is requested only after you select the location button and grant browser permission.
 - Precise coordinates are displayed in the page, are not sent to the IP lookup service, and are not stored by this project.
+- Browser and WebGL details are read locally in your browser and are not sent to the IP lookup service. The device fingerprint section displays attributes only; it does not generate a unique fingerprint ID or store these values. Availability and precision vary by browser; the signal count reports available fields and is not a risk score.
 - Precise location requires a secure context (HTTPS or localhost); reported accuracy depends on the device and environment.
 - Internet access is required for the IP lookup to work.
 
