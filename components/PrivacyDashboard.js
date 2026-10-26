@@ -252,23 +252,30 @@ export default function PrivacyDashboard() {
                   title="Your device"
                   accent="cyan"
                   rows={[
-                    { label: "OS / platform", value: browserInfo.platform || "Not exposed by this browser" },
                     { label: "Language", value: browserInfo.language },
                     { label: "Screen size", value: browserInfo.screen },
-                    { label: "Time zone", value: browserInfo.timezone },
-                    { label: "UTC offset", value: browserInfo.utcOffset },
-                    { label: "Device memory", value: browserInfo.deviceMemory || "Not exposed by this browser" },
-                    { label: "CPU threads", value: browserInfo.hardwareConcurrency || "Not exposed by this browser" },
-                    { label: "Connection type", value: browserInfo.connectionType || "Not exposed by this browser" },
                     { label: "User agent", value: browserInfo.userAgent, multiline: true },
-                    {
-                      label: "WebGL vendor / renderer / version",
-                      value: browserInfo.webglInfo || "Unavailable or restricted by browser",
-                      multiline: true,
-                    },
                   ]}
                 />
               </section>
+
+              <InfoPanel
+                title="Device fingerprint"
+                accent="cyan"
+                rows={[
+                  { label: "OS / platform", value: browserInfo.platform || "Not exposed by this browser" },
+                  { label: "Time zone", value: browserInfo.timezone },
+                  { label: "UTC offset", value: browserInfo.utcOffset },
+                  { label: "Device memory", value: browserInfo.deviceMemory || "Not exposed by this browser" },
+                  { label: "CPU threads", value: browserInfo.hardwareConcurrency || "Not exposed by this browser" },
+                  { label: "Connection type", value: browserInfo.connectionType || "Not exposed by this browser" },
+                  {
+                    label: "WebGL vendor / renderer / version",
+                    value: browserInfo.webglInfo || "Unavailable or restricted by browser",
+                    multiline: true,
+                  },
+                ]}
+              />
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 sm:p-5">
                 <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
@@ -278,7 +285,7 @@ export default function PrivacyDashboard() {
                   This is a small privacy-awareness demo showing what a page can learn from your public IP and browser APIs. Browser settings affect which details are available; this project does not store or sell them.
                 </p>
                 <p className="mt-3 text-sm leading-6 text-slate-400">
-                  Browser details, including WebGL information, are read in your browser and are not sent to the IP lookup service. Some browsers hide or limit these values. The signal count is a count of available fields, not a privacy or risk score.
+                  The device fingerprint section groups attributes that may help distinguish a browser/device when combined. This page displays the values only; it does not create a fingerprint ID or store them. Browser details are read locally and are not sent to the IP lookup service. Some browsers hide or limit these values. The signal count is not a privacy or risk score.
                 </p>
               </div>
             </div>
