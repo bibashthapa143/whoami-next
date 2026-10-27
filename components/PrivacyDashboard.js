@@ -116,6 +116,56 @@ export default function PrivacyDashboard() {
     browserInfo.webglInfo,
   ].filter(Boolean).length;
   const signalCount = networkSignalCount + browserSignalCount;
+  const browserIdentityCount = [
+    browserInfo.language,
+    browserInfo.screen,
+    browserInfo.userAgent,
+  ].filter(Boolean).length;
+  const fingerprintSignalCount = [
+    browserInfo.platform,
+    browserInfo.timezone,
+    browserInfo.utcOffset,
+    browserInfo.deviceMemory,
+    browserInfo.hardwareConcurrency,
+    browserInfo.connectionType,
+    browserInfo.webglInfo,
+  ].filter(Boolean).length;
+  const observedSignalGroups = [
+    networkSignalCount > 0,
+    fingerprintSignalCount > 0,
+    browserIdentityCount > 0,
+  ].filter(Boolean).length;
+  const exposureCategories = [
+    {
+      label: "Network exposure",
+      score: Math.round((networkSignalCount / 6) * 25),
+      detail: `${networkSignalCount} of 6 network fields available`,
+    },
+    {
+      label: "Device fingerprinting",
+      score: Math.round((fingerprintSignalCount / 7) * 25),
+      detail: `${fingerprintSignalCount} of 7 device attributes available`,
+    },
+    {
+      label: "Browser identity",
+      score: Math.round((browserIdentityCount / 3) * 25),
+      detail: `${browserIdentityCount} of 3 browser details available`,
+    },
+    {
+      label: "Tracking risk",
+      score: Math.round((observedSignalGroups / 3) * 25),
+      detail: `${observedSignalGroups} of 3 signal groups represented`,
+    },
+  ];
+  const exposureScore = exposureCategories.reduce((total, category) => total + category.score, 0);
+  const exposureLevel =
+    exposureScore < 40 ? "Low exposure" : exposureScore < 70 ? "Moderate exposure" : "High exposure";
+  const exposureColor =
+    exposureScore < 40
+      ? "bg-emerald-400"
+      : exposureScore < 70
+        ? "bg-amber-400"
+        : "bg-rose-400";
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -167,6 +217,75 @@ export default function PrivacyDashboard() {
               Couldn&apos;t fetch this — check your connection and try again.
             </div>
           )}
+
+          <section
+            aria-labelledby="exposure-score-heading"
+            className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:p-5"
+          >
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 id="exposure-score-heading" className="text-sm font-semibold text-white">
+                  Estimated exposure score
+                </h2>
+                <p className="mt-1 text-xs leading-5 text-slate-400">
+                  An educational estimate based on the signals available to this page.
+                </p>
+              </div>
+              <p className="text-2xl font-bold text-white" aria-live="polite">
+                {status === "done" && data ? `${exposureScore} / 100` : "-- / 100"}
+                {status === "done" && data && (
+                  <span className="ml-2 text-sm font-medium text-slate-300">{exposureLevel}</span>
+                )}
+              </p>
+            </div>
+
+            <div
+              className="mt-4 h-3 overflow-hidden rounded-full bg-slate-800"
+              role="meter"
+              aria-label="Estimated exposure score"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={status === "done" && data ? exposureScore : undefined}
+              aria-valuetext={status === "done" && data ? `${exposureScore} out of 100, ${exposureLevel}` : "Score unavailable"}
+            >
+              {status === "done" && data && (
+                <div
+                  className={`h-full rounded-full transition-all ${exposureColor}`}
+                  style={{ width: `${exposureScore}%` }}
+                />
+              )}
+            </div>
+
+            {status === "done" && data ? (
+              <>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  {exposureCategories.map((category) => (
+                    <div key={category.label} className="rounded-xl border border-slate-800 bg-slate-900/70 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-sm font-medium text-slate-200">{category.label}</h3>
+                        <span className="text-sm font-semibold text-white">{category.score} / 25</span>
+                      </div>
+                      <p className="mt-1 text-xs text-slate-400">{category.detail}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                  <span className="rounded-full bg-emerald-400/10 px-3 py-1 text-emerald-200">0–39 Low</span>
+                  <span className="rounded-full bg-amber-400/10 px-3 py-1 text-amber-200">40–69 Moderate</span>
+                  <span className="rounded-full bg-rose-400/10 px-3 py-1 text-rose-200">70–100 High</span>
+                </div>
+                <p className="mt-4 text-xs leading-5 text-slate-400">
+                  Categories are equally weighted. Tracking risk reflects how many signal groups are present, not actual tracking activity. This score is a simple heuristic, not a validated privacy or security assessment.
+                </p>
+              </>
+            ) : (
+              <p className="mt-3 text-xs leading-5 text-slate-400">
+                {status === "error"
+                  ? "Score unavailable because the network lookup did not complete; missing network data is not counted as zero exposure."
+                  : "Waiting for the network lookup so the score can include both network and browser signals."}
+              </p>
+            )}
+          </section>
 
           <section
             aria-labelledby="precise-location-heading"
