@@ -321,9 +321,21 @@ export default function PrivacyDashboard() {
             {preciseLocation && locationStatus === "success" && (
               <div role="status" className="mt-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <LocationValue label="Latitude" value={preciseLocation.latitude.toFixed(6)} />
-                  <LocationValue label="Longitude" value={preciseLocation.longitude.toFixed(6)} />
-                  <LocationValue label="Reported accuracy" value={`about ${Math.round(preciseLocation.accuracy)} m`} />
+                  <LocationValue
+                    label="Latitude"
+                    value={preciseLocation.latitude.toFixed(6)}
+                    explanation="One coordinate that helps pinpoint your location."
+                  />
+                  <LocationValue
+                    label="Longitude"
+                    value={preciseLocation.longitude.toFixed(6)}
+                    explanation="The other coordinate used to pinpoint your location."
+                  />
+                  <LocationValue
+                    label="Reported accuracy"
+                    value={`about ${Math.round(preciseLocation.accuracy)} m`}
+                    explanation="The device's estimated radius of accuracy."
+                  />
                 </div>
                 <p className="mt-3 text-xs leading-5 text-slate-400">
                   Accuracy is an estimate from your device and browser, not a guarantee of GPS precision.
@@ -357,12 +369,12 @@ export default function PrivacyDashboard() {
                     title="Network"
                     accent="indigo"
                     rows={[
-                      { label: "IP Address", value: data.ip },
-                      { label: "City", value: data.city },
-                      { label: "Region", value: data.region },
-                      { label: "Country", value: data.country_name },
-                      { label: "ISP", value: data.org },
-                      { label: "Timezone", value: data.timezone },
+                      { label: "IP Address", value: data.ip, explanation: "Identifies your internet connection and can estimate your general location." },
+                      { label: "City", value: data.city, explanation: "An approximate location inferred from your public IP, not GPS." },
+                      { label: "Region", value: data.region, explanation: "A broader area estimated from your public IP." },
+                      { label: "Country", value: data.country_name, explanation: "The country associated with your public IP address." },
+                      { label: "ISP", value: data.org, explanation: "Shows the provider or organization associated with your connection." },
+                      { label: "Timezone", value: data.timezone, explanation: "A time zone estimate returned by the IP lookup service." },
                     ]}
                   />
                 )}
@@ -371,9 +383,9 @@ export default function PrivacyDashboard() {
                   title="Your device"
                   accent="cyan"
                   rows={[
-                    { label: "Language", value: browserInfo.language },
-                    { label: "Screen size", value: browserInfo.screen },
-                    { label: "User agent", value: browserInfo.userAgent, multiline: true },
+                    { label: "Language", value: browserInfo.language, explanation: "Helps a site choose language and regional formatting." },
+                    { label: "Screen size", value: browserInfo.screen, explanation: "Helps adapt page layout and can contribute to a device profile." },
+                    { label: "User agent", value: browserInfo.userAgent, explanation: "Describes browser software and platform for compatibility; it may also help distinguish browsers.", multiline: true },
                   ]}
                 />
               </section>
@@ -382,29 +394,44 @@ export default function PrivacyDashboard() {
                 title="Device fingerprint"
                 accent="cyan"
                 rows={[
-                  { label: "OS / platform", value: browserInfo.platform || "Not exposed by this browser" },
-                  { label: "Time zone", value: browserInfo.timezone },
-                  { label: "UTC offset", value: browserInfo.utcOffset },
-                  { label: "Device memory", value: browserInfo.deviceMemory || "Not exposed by this browser" },
-                  { label: "CPU threads", value: browserInfo.hardwareConcurrency || "Not exposed by this browser" },
-                  { label: "Connection type", value: browserInfo.connectionType || "Not exposed by this browser" },
+                  { label: "OS / platform", value: browserInfo.platform || "Not exposed by this browser", explanation: "Identifies the operating system family or platform." },
+                  { label: "Time zone", value: browserInfo.timezone, explanation: "Can suggest your region and contributes to a browser profile." },
+                  { label: "UTC offset", value: browserInfo.utcOffset, explanation: "Shows your local offset from UTC; it can vary with daylight saving time." },
+                  { label: "Device memory", value: browserInfo.deviceMemory || "Not exposed by this browser", explanation: "A browser-provided, rounded estimate that can help distinguish device classes." },
+                  { label: "CPU threads", value: browserInfo.hardwareConcurrency || "Not exposed by this browser", explanation: "Reports logical processor count and may help distinguish device configurations." },
+                  { label: "Connection type", value: browserInfo.connectionType || "Not exposed by this browser", explanation: "A coarse network estimate that can affect content or performance choices." },
                   {
                     label: "WebGL vendor / renderer / version",
                     value: browserInfo.webglInfo || "Unavailable or restricted by browser",
+                    explanation: "Graphics details can vary between devices and may contribute to browser fingerprinting.",
                     multiline: true,
                   },
                 ]}
               />
 
               <div className="rounded-2xl border border-slate-800 bg-slate-950/50 p-4 sm:p-5">
-                <p className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Why this matters
-                </p>
-                <p className="text-sm leading-6 text-slate-300">
-                  This is a small privacy-awareness demo showing what a page can learn from your public IP and browser APIs. Browser settings affect which details are available; this project does not store or sell them.
-                </p>
-                <p className="mt-3 text-sm leading-6 text-slate-400">
-                  The device fingerprint section groups attributes that may help distinguish a browser/device when combined. This page displays the values only; it does not create a fingerprint ID or store them. Browser details are read locally and are not sent to the IP lookup service. Some browsers hide or limit these values. The signal count is not a privacy or risk score.
+                <div className="grid gap-6 lg:grid-cols-2">
+                  <section aria-labelledby="why-matters-heading">
+                    <h2 id="why-matters-heading" className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                      Why this matters
+                    </h2>
+                    <p className="text-sm leading-6 text-slate-300">
+                      Websites can use network and browser details to adapt content, estimate your general location, or help recognize a device when several attributes are combined. This page shows the attributes but does not create a fingerprint ID or store them. The IP lookup provider receives your public IP to return network details.
+                    </p>
+                  </section>
+                  <section aria-labelledby="reduce-exposure-heading">
+                    <h2 id="reduce-exposure-heading" className="mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                      How to reduce it
+                    </h2>
+                    <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-slate-300">
+                      <li>Use browser privacy protections that limit cross-site tracking and fingerprinting.</li>
+                      <li>Review site permissions and allow precise location only when needed.</li>
+                      <li>A VPN can hide your usual public IP from a site, but shifts trust to the VPN provider and does not hide browser details.</li>
+                    </ul>
+                  </section>
+                </div>
+                <p className="mt-4 border-t border-slate-800 pt-4 text-xs leading-5 text-slate-400">
+                  Browser settings affect which details are available. Browser data is read locally and is not sent to the IP lookup service; the signal count is not a privacy or risk score.
                 </p>
               </div>
             </div>
@@ -425,11 +452,12 @@ function MetricCard({ label, value, detail }) {
   );
 }
 
-function LocationValue({ label, value }) {
+function LocationValue({ label, value, explanation }) {
   return (
     <div>
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
       <p className="mt-1 break-all text-sm font-medium text-white">{value}</p>
+      <p className="mt-1 text-xs leading-5 text-slate-400">{explanation}</p>
     </div>
   );
 }
@@ -447,19 +475,28 @@ function InfoPanel({ title, rows, accent }) {
       </div>
       <div className="space-y-3">
         {rows.map((row) => (
-          <Row key={row.label} label={row.label} value={row.value} multiline={row.multiline} />
+          <Row
+            key={row.label}
+            label={row.label}
+            value={row.value}
+            explanation={row.explanation}
+            multiline={row.multiline}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function Row({ label, value, multiline }) {
+function Row({ label, value, explanation, multiline }) {
   return (
-    <div className="flex items-center justify-between gap-4 border-b border-slate-800 pb-2.5 last:border-b-0 last:pb-0">
-      <span className="text-sm text-slate-400">{label}</span>
+    <div className="flex flex-col gap-1 border-b border-slate-800 pb-2.5 last:border-b-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+      <div className="sm:max-w-[55%]">
+        <p className="text-sm text-slate-300">{label}</p>
+        <p className="mt-0.5 text-xs leading-5 text-slate-500">{explanation}</p>
+      </div>
       <span
-        className={`${multiline ? "max-w-[65%] break-all" : "max-w-[220px] truncate"} text-right text-sm font-medium text-slate-100`}
+        className={`${multiline ? "sm:max-w-[45%] break-all" : "sm:max-w-[220px] sm:truncate"} text-sm font-medium text-slate-100 sm:text-right`}
       >
         {value || "—"}
       </span>
