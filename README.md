@@ -78,6 +78,7 @@ http://localhost:3000
 - IP-based location is approximate. Precise location is requested only after you select the location button and grant browser permission.
 - Precise coordinates are displayed in the page, are not sent to the IP lookup service, and are not stored by this project.
 - Browser and WebGL details are read locally in your browser and are not sent to the IP lookup service. The device fingerprint section displays attributes only; it does not generate a unique fingerprint ID or store these values. Availability and precision vary by browser; the signal count reports available fields and is not a risk score.
+- Each displayed data point includes a short explanation of how it may be used. The dashboard also explains why the data matters and lists practical ways to reduce exposure.
 - The exposure meter is a simple, equally weighted heuristic (25 points per category), not a validated privacy or security assessment. It labels 0–39 low, 40–69 moderate, and 70–100 high. Tracking risk reflects how many signal groups are represented, not actual tracking activity. A failed network lookup leaves the score unavailable instead of treating missing data as zero exposure.
 - Precise location requires a secure context (HTTPS or localhost); reported accuracy depends on the device and environment.
 - Internet access is required for the IP lookup to work.
