@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import ExposureCharts from "./ExposureCharts";
 
 export default function PrivacyDashboard() {
   const [data, setData] = useState(null);
@@ -362,6 +363,14 @@ export default function PrivacyDashboard() {
                 )}
                 <MetricCard label="Browser signals" value={`${browserSignalCount} / 10`} detail="read locally by this page" />
               </section>
+
+              {data && (
+                <ExposureCharts
+                  exposureCategories={exposureCategories}
+                  networkSignalCount={networkSignalCount}
+                  browserSignalCount={browserSignalCount}
+                />
+              )}
 
               <section className={`grid gap-6 ${data ? "lg:grid-cols-2" : ""}`}>
                 {data && (
