@@ -16,6 +16,7 @@ The project is intentionally simple: it demonstrates how much information is ava
 - A separate device fingerprint section showing OS/platform, time zone, UTC offset, approximate device memory, CPU thread count, connection type, and WebGL details when exposed
 - Browser language, screen size, and user agent
 - Estimated exposure meter with network, device fingerprinting, browser identity, and tracking-risk breakdowns
+- Chart.js visualizations for category scores, exposure-level distribution, and metadata signal counts
 - Optional, permission-based precise location with reported accuracy
 - Minimal, privacy-focused UI
 - No persistent database or user account system
@@ -36,6 +37,7 @@ whoami-next/
 │   ├── layout.js
 │   └── page.js
 ├── components/
+│   ├── ExposureCharts.js
 │   └── PrivacyDashboard.js
 ├── public/
 ├── .gitignore
