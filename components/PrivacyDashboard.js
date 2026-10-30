@@ -9,6 +9,7 @@ export default function PrivacyDashboard() {
   const [locationStatus, setLocationStatus] = useState("idle");
   const [preciseLocation, setPreciseLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
+  const [activeTab, setActiveTab] = useState("current");
 
   const [browserInfo, setBrowserInfo] = useState({
     language: "",
@@ -207,18 +208,42 @@ export default function PrivacyDashboard() {
             </div>
           </header>
 
-          {status === "loading" && (
+          <nav aria-label="Dashboard sections" className="mb-6 flex flex-wrap gap-2 border-b border-slate-800 pb-4">
+            {[
+              { id: "current", label: "Current visit" },
+              { id: "score", label: "Privacy score" },
+              { id: "comparison", label: "Comparison" },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                aria-pressed={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`rounded-xl px-4 py-2.5 text-sm font-medium transition ${
+                  activeTab === tab.id
+                    ? "bg-indigo-500/20 text-indigo-100 ring-1 ring-indigo-400/40"
+                    : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+
+          {activeTab === "current" && status === "loading" && (
             <div className="flex min-h-[180px] items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/60">
               <p className="animate-pulse text-sm text-slate-400">Checking your public profile...</p>
             </div>
           )}
 
-          {status === "error" && (
+          {activeTab === "current" && status === "error" && (
             <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
               Couldn&apos;t fetch this — check your connection and try again.
             </div>
           )}
 
+          {activeTab === "score" && (
+            <div role="region" aria-label="Privacy score">
           <section
             aria-labelledby="exposure-score-heading"
             className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:p-5"
@@ -288,6 +313,20 @@ export default function PrivacyDashboard() {
             )}
           </section>
 
+              {status === "done" && data && (
+                <div className="mt-6">
+                  <ExposureCharts
+                    exposureCategories={exposureCategories}
+                    networkSignalCount={networkSignalCount}
+                    browserSignalCount={browserSignalCount}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "current" && (
+            <div role="region" aria-label="Current visit details">
           <section
             aria-labelledby="precise-location-heading"
             className="mt-6 rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:p-5"
@@ -359,18 +398,10 @@ export default function PrivacyDashboard() {
                   <>
                     <MetricCard label="Network signals" value={`${networkSignalCount} / 6`} detail="returned by IP lookup" />
                     <MetricCard label="IP location" value={data.city ? "Approximate" : "Unavailable"} detail="not GPS location" />
-                  </>
-                )}
-                <MetricCard label="Browser signals" value={`${browserSignalCount} / 10`} detail="read locally by this page" />
+                      </>
+                    )}
+                    <MetricCard label="Browser signals" value={`${browserSignalCount} / 10`} detail="read locally by this page" />
               </section>
-
-              {data && (
-                <ExposureCharts
-                  exposureCategories={exposureCategories}
-                  networkSignalCount={networkSignalCount}
-                  browserSignalCount={browserSignalCount}
-                />
-              )}
 
               <section className={`grid gap-6 ${data ? "lg:grid-cols-2" : ""}`}>
                 {data && (
@@ -440,10 +471,79 @@ export default function PrivacyDashboard() {
                   </section>
                 </div>
                 <p className="mt-4 border-t border-slate-800 pt-4 text-xs leading-5 text-slate-400">
-                  Browser settings affect which details are available. Browser data is read locally and is not sent to the IP lookup service; the signal count is not a privacy or risk score.
+                  Browser settings affect which details are available. Values read through browser APIs are not added to the IP lookup data, though standard request headers may expose some browser details. The signal count is not a privacy or risk score.
                 </p>
               </div>
             </div>
+          )}
+            </div>
+          )}
+
+          {activeTab === "comparison" && (
+            <section aria-labelledby="comparison-heading" className="space-y-6">
+              <div>
+                <h2 id="comparison-heading" className="text-lg font-semibold text-white">
+                  What kind of data is this?
+                </h2>
+                <p className="mt-1 text-sm leading-6 text-slate-400">
+                  Compare data associated with your public internet connection with details this page reads from your browser.
+                </p>
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ComparisonPanel
+                  title="Public network data"
+                  badge="IP lookup"
+                  description="The IP lookup service uses your public IP to return network-related details. IP-based location is approximate."
+                  items={[
+                    `Public IP address${data?.ip ? `: ${data.ip}` : ""}`,
+                    "Approximate city, region, and country",
+                    "Internet provider or network organization",
+                    "Network-derived timezone",
+                  ]}
+                />
+                <ComparisonPanel
+                  title="Browser-only metadata"
+                  badge="Read on this page"
+                  description="This page reads these values through browser APIs; it does not add them to the IP lookup data. Standard HTTP request headers may still reveal some browser details."
+                  items={[
+                    "Language, screen size, and user agent",
+                    "Platform, local timezone, and UTC offset",
+                    "Approximate memory and logical CPU threads",
+                    "Connection hints and WebGL information when exposed",
+                  ]}
+                />
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <ComparisonPanel
+                  title="May help recognize a browser"
+                  badge="Potential tracking signals"
+                  description="These values can contribute to recognition when combined, but their presence does not mean a site is tracking you."
+                  items={[
+                    "Public IP address across visits",
+                    "User agent and operating-system platform",
+                    "Screen size, timezone, and UTC offset",
+                    "Device capabilities and WebGL details",
+                  ]}
+                />
+                <ComparisonPanel
+                  title="Often used for site functionality"
+                  badge="Context and preferences"
+                  description="These details can help a site adapt its behavior; they may also contribute to a profile when combined with other data."
+                  items={[
+                    "Language for content and formatting",
+                    "Screen size for responsive page layout",
+                    "Connection hints for performance choices",
+                    "Timezone for displaying local times",
+                  ]}
+                />
+              </div>
+
+              <p className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
+                These groups are not a strict tracking / non-tracking split: the same signal can support useful features or contribute to tracking. This page does not observe whether another site stores, shares, or uses these values to track you. The IP lookup provider receives your public IP and may receive standard request headers.
+              </p>
+            </section>
           )}
         </div>
       </div>
@@ -458,6 +558,25 @@ function MetricCard({ label, value, detail }) {
       <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
       <p className="mt-1 text-xs text-slate-400">{detail}</p>
     </div>
+  );
+}
+
+function ComparisonPanel({ title, badge, description, items }) {
+  return (
+    <section className="rounded-2xl border border-slate-800 bg-slate-950/60 p-4 sm:p-5">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-white">{title}</h3>
+        <span className="rounded-full border border-slate-700 px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-slate-300">
+          {badge}
+        </span>
+      </div>
+      <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p>
+      <ul className="mt-4 list-disc space-y-2 pl-5 text-sm leading-5 text-slate-300">
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
