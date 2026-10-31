@@ -17,6 +17,7 @@ The project is intentionally simple: it demonstrates how much information is ava
 - Browser language, screen size, and user agent
 - Estimated exposure meter with network, device fingerprinting, browser identity, and tracking-risk breakdowns
 - Chart.js visualizations for category scores, exposure-level distribution, and metadata signal counts
+- Local history of the last five completed checks with privacy-score and signal-count trends
 - Dashboard tabs for the current visit, privacy score, and comparisons between public network data, browser metadata, potential tracking signals, and common functionality signals
 - Optional, permission-based precise location with reported accuracy
 - Minimal, privacy-focused UI
@@ -39,7 +40,8 @@ whoami-next/
 │   └── page.js
 ├── components/
 │   ├── ExposureCharts.js
-│   └── PrivacyDashboard.js
+│   ├── PrivacyDashboard.js
+│   └── VisitHistory.js
 ├── public/
 ├── .gitignore
 ├── AGENTS.md
@@ -83,6 +85,7 @@ http://localhost:3000
 - Browser and WebGL details are read through browser APIs and are not added to the IP lookup data. Standard HTTP request headers may still reveal some browser details, such as the user agent. The device fingerprint section displays attributes only; it does not generate a unique fingerprint ID or store these values. Availability and precision vary by browser; the signal count reports available fields and is not a risk score.
 - Each displayed data point includes a short explanation of how it may be used. The dashboard also explains why the data matters and lists practical ways to reduce exposure.
 - The exposure meter is a simple, equally weighted heuristic (25 points per category), not a validated privacy or security assessment. It labels 0–39 low, 40–69 moderate, and 70–100 high. Tracking risk reflects how many signal groups are represented, not actual tracking activity. A failed network lookup leaves the score unavailable instead of treating missing data as zero exposure.
+- The last five completed checks are stored in this browser's `localStorage` (timestamp, score, and signal counts only). Raw IP addresses, coordinates, and browser details are not included. Use **Clear history** to remove them; clearing browser site data also deletes the history.
 - Precise location requires a secure context (HTTPS or localhost); reported accuracy depends on the device and environment.
 - Internet access is required for the IP lookup to work.
 
