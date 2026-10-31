@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ExposureCharts from "./ExposureCharts";
+import VisitHistory from "./VisitHistory";
+
+const HISTORY_STORAGE_KEY = "whoami-next-visit-history";
+const MAX_SAVED_VISITS = 5;
 
 export default function PrivacyDashboard() {
   const [data, setData] = useState(null);
@@ -10,6 +14,12 @@ export default function PrivacyDashboard() {
   const [preciseLocation, setPreciseLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
   const [activeTab, setActiveTab] = useState("current");
+  const [browserInfoReady, setBrowserInfoReady] = useState(false);
+  const [visitHistory, setVisitHistory] = useState([]);
+  const [currentSavedVisit, setCurrentSavedVisit] = useState(null);
+  const [historyStatus, setHistoryStatus] = useState("loading");
+  const [historyError, setHistoryError] = useState("");
+  const hasSavedVisit = useRef(false);
 
   const [browserInfo, setBrowserInfo] = useState({
     language: "",
@@ -43,6 +53,7 @@ export default function PrivacyDashboard() {
         : "",
       webglInfo: getWebGlInfo(),
     });
+    setBrowserInfoReady(true);
 
     fetch("https://ipapi.co/json/")
       .then((res) => res.json())
@@ -56,6 +67,40 @@ export default function PrivacyDashboard() {
         setStatus("done");
       })
       .catch(() => setStatus("error"));
+  }, []);
+
+  useEffect(() => {
+    try {
+      const savedHistory = window.localStorage.getItem(HISTORY_STORAGE_KEY);
+
+      if (savedHistory === null) {
+        setHistoryStatus("ready");
+        return;
+      }
+
+      const parsedHistory = JSON.parse(savedHistory);
+      if (!Array.isArray(parsedHistory) || !parsedHistory.every(isValidVisit)) {
+        throw new Error("Saved visit history has an invalid format.");
+      }
+
+      setVisitHistory(
+        parsedHistory
+          .sort((first, second) => Date.parse(second.checkedAt) - Date.parse(first.checkedAt))
+          .slice(0, MAX_SAVED_VISITS)
+          .map(({ checkedAt, score, networkSignals, browserSignals }) => ({
+            checkedAt,
+            score,
+            networkSignals,
+            browserSignals,
+          })),
+      );
+      setHistoryStatus("ready");
+    } catch {
+      setHistoryError(
+        "Saved visit history could not be read. Clear the saved history to start a new one.",
+      );
+      setHistoryStatus("error");
+    }
   }, []);
 
   function requestPreciseLocation() {
@@ -168,6 +213,63 @@ export default function PrivacyDashboard() {
       : exposureScore < 70
         ? "bg-amber-400"
         : "bg-rose-400";
+
+  useEffect(() => {
+    if (
+      status !== "done" ||
+      !data ||
+      !browserInfoReady ||
+      historyStatus !== "ready" ||
+      hasSavedVisit.current
+    ) {
+      return;
+    }
+
+    hasSavedVisit.current = true;
+    const currentVisit = {
+      checkedAt: new Date().toISOString(),
+      score: exposureScore,
+      networkSignals: networkSignalCount,
+      browserSignals: browserSignalCount,
+    };
+    const nextHistory = [currentVisit, ...visitHistory].slice(0, MAX_SAVED_VISITS);
+
+    try {
+      window.localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+      setVisitHistory(nextHistory);
+      setCurrentSavedVisit(currentVisit);
+      setHistoryError("");
+    } catch {
+      setHistoryError("This browser could not save visit history. Check its local storage settings.");
+      setHistoryStatus("error");
+    }
+  }, [
+    browserInfoReady,
+    browserSignalCount,
+    data,
+    exposureScore,
+    historyStatus,
+    networkSignalCount,
+    status,
+    visitHistory,
+  ]);
+
+  function clearVisitHistory() {
+    try {
+      window.localStorage.removeItem(HISTORY_STORAGE_KEY);
+      setVisitHistory([]);
+      setCurrentSavedVisit(null);
+      setHistoryError("");
+      setHistoryStatus("ready");
+    } catch {
+      setHistoryError("This browser could not clear the saved visit history.");
+      setHistoryStatus("error");
+    }
+  }
+
+  const previousVisit = visitHistory.find(
+    (visit) => visit.checkedAt !== currentSavedVisit?.checkedAt,
+  );
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-100">
@@ -322,6 +424,14 @@ export default function PrivacyDashboard() {
                   />
                 </div>
               )}
+              <VisitHistory
+                visits={visitHistory}
+                currentVisit={currentSavedVisit}
+                previousVisit={previousVisit}
+                status={historyStatus}
+                error={historyError}
+                onClear={clearVisitHistory}
+              />
             </div>
           )}
 
@@ -558,6 +668,24 @@ function MetricCard({ label, value, detail }) {
       <p className="mt-3 text-2xl font-semibold text-white">{value}</p>
       <p className="mt-1 text-xs text-slate-400">{detail}</p>
     </div>
+  );
+}
+
+function isValidVisit(visit) {
+  return (
+    visit !== null &&
+    typeof visit === "object" &&
+    typeof visit.checkedAt === "string" &&
+    Number.isFinite(Date.parse(visit.checkedAt)) &&
+    Number.isInteger(visit.score) &&
+    visit.score >= 0 &&
+    visit.score <= 100 &&
+    Number.isInteger(visit.networkSignals) &&
+    visit.networkSignals >= 0 &&
+    visit.networkSignals <= 6 &&
+    Number.isInteger(visit.browserSignals) &&
+    visit.browserSignals >= 0 &&
+    visit.browserSignals <= 10
   );
 }
 
