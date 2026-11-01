@@ -17,6 +17,7 @@ The project is intentionally simple: it demonstrates how much information is ava
 - Browser language, screen size, and user agent
 - Estimated exposure meter with network, device fingerprinting, browser identity, and tracking-risk breakdowns
 - Chart.js visualizations for category scores, exposure-level distribution, and metadata signal counts
+- On-demand shareable reports in plain text, HTML, and PNG summary-card formats
 - Local history of the last five completed checks with privacy-score and signal-count trends
 - Dashboard tabs for the current visit, privacy score, and comparisons between public network data, browser metadata, potential tracking signals, and common functionality signals
 - Optional, permission-based precise location with reported accuracy
@@ -40,6 +41,7 @@ whoami-next/
 │   └── page.js
 ├── components/
 │   ├── ExposureCharts.js
+│   ├── ExposureReport.js
 │   ├── PrivacyDashboard.js
 │   └── VisitHistory.js
 ├── public/
@@ -86,6 +88,7 @@ http://localhost:3000
 - Each displayed data point includes a short explanation of how it may be used. The dashboard also explains why the data matters and lists practical ways to reduce exposure.
 - The exposure meter is a simple, equally weighted heuristic (25 points per category), not a validated privacy or security assessment. It labels 0–39 low, 40–69 moderate, and 70–100 high. Tracking risk reflects how many signal groups are represented, not actual tracking activity. A failed network lookup leaves the score unavailable instead of treating missing data as zero exposure.
 - The last five completed checks are stored in this browser's `localStorage` (timestamp, score, and signal counts only). Raw IP addresses, coordinates, and browser details are not included. Use **Clear history** to remove them; clearing browser site data also deletes the history.
+- Reports are generated only when requested in the browser and can be downloaded as plain text, HTML, or a PNG summary card; no file is uploaded. They contain the score, signal counts, category summaries, and a UTC timestamp, but omit raw IP addresses, precise coordinates, and browser detail values.
 - Precise location requires a secure context (HTTPS or localhost); reported accuracy depends on the device and environment.
 - Internet access is required for the IP lookup to work.
 
