@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import ExposureCharts from "./ExposureCharts";
+import ExposureReport from "./ExposureReport";
 import VisitHistory from "./VisitHistory";
 
 const HISTORY_STORAGE_KEY = "whoami-next-visit-history";
@@ -431,6 +432,14 @@ export default function PrivacyDashboard() {
                 status={historyStatus}
                 error={historyError}
                 onClear={clearVisitHistory}
+              />
+              <ExposureReport
+                score={exposureScore}
+                level={exposureLevel}
+                networkSignals={networkSignalCount}
+                browserSignals={browserSignalCount}
+                categories={exposureCategories}
+                available={status === "done" && Boolean(data)}
               />
             </div>
           )}
