@@ -20,6 +20,7 @@ The project is intentionally simple: it demonstrates how much information is ava
 - On-demand shareable reports in plain text, HTML, and PNG summary-card formats
 - Local history of the last five completed checks with privacy-score and signal-count trends
 - Dashboard tabs for the current visit, privacy score, and comparisons between public network data, browser metadata, potential tracking signals, and common functionality signals
+- Privacy tools tab with an approximate IP-region map, simulated tracker panel, consent-awareness demo, extension-style status card, and browser/privacy-mode comparison
 - Optional, permission-based precise location with reported accuracy
 - Minimal, privacy-focused UI
 - No persistent database or user account system
@@ -43,6 +44,7 @@ whoami-next/
 │   ├── ExposureCharts.js
 │   ├── ExposureReport.js
 │   ├── PrivacyDashboard.js
+│   ├── PrivacyTools.js
 │   └── VisitHistory.js
 ├── public/
 ├── .gitignore
@@ -89,6 +91,8 @@ http://localhost:3000
 - The exposure meter is a simple, equally weighted heuristic (25 points per category), not a validated privacy or security assessment. It labels 0–39 low, 40–69 moderate, and 70–100 high. Tracking risk reflects how many signal groups are represented, not actual tracking activity. A failed network lookup leaves the score unavailable instead of treating missing data as zero exposure.
 - The last five completed checks are stored in this browser's `localStorage` (timestamp, score, and signal counts only). Raw IP addresses, coordinates, and browser details are not included. Use **Clear history** to remove them; clearing browser site data also deletes the history.
 - Reports are generated only when requested in the browser and can be downloaded as plain text, HTML, or a PNG summary card; no file is uploaded. They contain the score, signal counts, category summaries, and a UTC timestamp, but omit raw IP addresses, precise coordinates, and browser detail values.
+- The privacy-tools map uses only approximate latitude/longitude from the IP lookup; it does not use precise device location. The tracker panel is a local simulation and does not inspect network requests or block trackers. Consent toggles are an educational demo and do not set cookies or change storage. The extension-style card is not an installed extension or a protection service.
+- Browser/privacy-mode comparisons show general tendencies selected by the user. The app does not detect private browsing, and private mode does not necessarily hide a public IP address or prevent browser fingerprinting.
 - Precise location requires a secure context (HTTPS or localhost); reported accuracy depends on the device and environment.
 - Internet access is required for the IP lookup to work.
 
