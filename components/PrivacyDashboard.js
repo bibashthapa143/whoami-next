@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import ExposureCharts from "./ExposureCharts";
 import ExposureReport from "./ExposureReport";
 import VisitHistory from "./VisitHistory";
+import PrivacyTools from "./PrivacyTools";
 
 const HISTORY_STORAGE_KEY = "whoami-next-visit-history";
 const MAX_SAVED_VISITS = 5;
@@ -316,6 +317,7 @@ export default function PrivacyDashboard() {
               { id: "current", label: "Current visit" },
               { id: "score", label: "Privacy score" },
               { id: "comparison", label: "Comparison" },
+              { id: "tools", label: "Privacy tools" },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -342,6 +344,16 @@ export default function PrivacyDashboard() {
           {activeTab === "current" && status === "error" && (
             <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-sm text-red-200">
               Couldn&apos;t fetch this — check your connection and try again.
+            </div>
+          )}
+
+          {activeTab === "tools" && (
+            <div role="region" aria-label="Privacy tools">
+              <PrivacyTools
+                data={data}
+                browserSignalCount={browserSignalCount}
+                networkSignalCount={networkSignalCount}
+              />
             </div>
           )}
 
